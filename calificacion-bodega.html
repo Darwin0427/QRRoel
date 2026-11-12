@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Califica tu experiencia – Roel Joyas (Bodega)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:      #1a2554;
+      --gold:      #c9a84c;
+      --gold-pale: #fdf8ee;
+      --cream:     #f6f3ed;
+      --border:    rgba(201,168,76,.22);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px 48px;
+      background-image:
+        radial-gradient(ellipse at top,    rgba(201,168,76,.07) 0%, transparent 60%),
+        radial-gradient(ellipse at bottom, rgba(26,37,84,.05)   0%, transparent 60%);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── HEADER ── */
+    .header {
+      width: 100%; max-width: 440px; text-align: center;
+      margin-bottom: 28px;
+      animation: fadeUp .55s ease both;
+    }
+    .logo-wrap { margin-bottom: 16px; }
+    .logo-wrap img { max-width: 190px; height: auto; filter: drop-shadow(0 2px 8px rgba(26,37,84,.15)); }
+    .logo-fallback { display: none; flex-direction: column; align-items: center; gap: 2px; }
+    .logo-fallback .brand {
+      font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 700;
+      color: var(--navy); letter-spacing: 8px;
+    }
+    .logo-fallback .sub {
+      font-size: 10px; letter-spacing: 4px; color: var(--gold);
+      text-transform: uppercase; font-weight: 500;
+    }
+
+    .ornament { display: flex; align-items: center; gap: 10px; margin: 14px auto; max-width: 200px; }
+    .ornament::before, .ornament::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+    .ornament span { color: var(--gold); font-size: 13px; }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 700;
+      color: var(--navy); margin-bottom: 8px;
+    }
+    .header p { font-size: 14px; color: #7a8a9e; line-height: 1.6; font-weight: 300; }
+
+    /* ── CARD ── */
+    .card {
+      width: 100%; max-width: 440px; background: #fff;
+      border-radius: 22px; padding: 28px 22px;
+      box-shadow: 0 6px 30px rgba(26,37,84,.09), 0 1px 0 var(--border);
+      border: 1px solid var(--border);
+      animation: fadeUp .55s .12s ease both;
+    }
+    .card.hidden { display: none; }
+
+    /* ── RATING BLOCK ── */
+    .rating-block { margin-bottom: 8px; }
+
+    .block-header {
+      display: flex; align-items: center; gap: 11px; margin-bottom: 18px;
+    }
+    .block-icon {
+      width: 42px; height: 42px; border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0; border: 1px solid var(--border);
+    }
+    .icon-s { background: #eef1fb; }
+    .icon-p { background: var(--gold-pale); }
+    .icon-t { background: #eef6f1; }
+    .block-title { text-align: left; }
+    .block-title strong {
+      font-family: 'Playfair Display', serif;
+      display: block; font-size: 16px; font-weight: 600; color: var(--navy);
+    }
+    .block-title small { font-size: 12px; color: #9aa5b4; }
+
+    /* ── STARS ── */
+    .stars {
+      display: flex; justify-content: center; gap: 6px;
+      margin-bottom: 10px; padding: 4px 0;
+    }
+
+    /* CSS-drawn stars using ★ / ☆ characters */
+    .star {
+      font-size: 46px;
+      line-height: 1;
+      cursor: pointer;
+      user-select: none;
+      transition: transform .18s cubic-bezier(.34,1.56,.64,1), color .15s;
+      /* Empty star: gold outline color, clearly visible */
+      color: #ddc87a;
+      /* Show ☆ by default */
+    }
+    .star::before { content: '☆'; }
+
+    /* Filled star */
+    .star.active {
+      color: var(--gold);
+    }
+    .star.active::before { content: '★'; }
+
+    /* Just-clicked bounce */
+    .star.pop {
+      animation: starPop .28s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes starPop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.4); }
+      100% { transform: scale(1.05); }
+    }
+
+    /* Hover preview (non-touch only) */
+    @media (hover: hover) {
+      .stars:hover .star { color: #ddc87a; }
+      .stars:hover .star::before { content: '☆'; }
+      .stars:hover .star:hover,
+      .stars:hover .star:hover ~ .star { color: #ddc87a; }
+      /* Stars up to hovered one = filled gold */
+    }
+
+    .rating-hint {
+      text-align: center; font-size: 13px; color: #a0a8b4;
+      min-height: 20px; transition: all .2s; margin-bottom: 4px;
+      font-weight: 400;
+    }
+    .rating-hint.chosen { color: var(--gold); font-weight: 600; }
+
+    /* ── DIVIDER ── */
+    .block-divider {
+      display: flex; align-items: center; gap: 10px; margin: 20px 0;
+    }
+    .block-divider::before, .block-divider::after {
+      content: ''; flex: 1; height: 1px; background: #f0ece4;
+    }
+    .block-divider span { font-size: 13px; color: var(--gold); opacity: .75; }
+
+    /* ── COMMENT ── */
+    .comment-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 10px; gap: 10px;
+    }
+    .comment-row label {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px; font-weight: 600; color: var(--navy);
+      display: flex; align-items: flex-start; gap: 7px;
+    }
+    .comment-row label svg {
+      width: 22px; height: 22px; flex-shrink: 0; margin-top: 2px;
+    }
+    .opt-badge {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px; font-weight: 500; color: #9aa5b4;
+      background: #f4f2ee; padding: 3px 10px; border-radius: 20px;
+      letter-spacing: .5px; text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    textarea {
+      width: 100%; min-height: 88px; border: 1.5px solid #e4e0d8;
+      border-radius: 14px; padding: 13px 15px;
+      font-size: 14px; font-family: 'Inter', sans-serif;
+      color: var(--navy); resize: vertical; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      background: #fdfcf9; line-height: 1.6;
+    }
+    textarea::placeholder { color: #c0bab0; font-weight: 300; }
+    textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,.10);
+      background: #fff;
+    }
+
+    /* ── BUTTON ── */
+    .btn-area { margin-top: 26px; }
+    .btn-submit {
+      display: block; width: 100%; padding: 16px;
+      background: linear-gradient(135deg, #1a2554 0%, #2c3f8a 100%);
+      color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 15px; font-weight: 600; letter-spacing: 1.2px;
+      text-transform: uppercase; border: none; border-radius: 50px;
+      cursor: pointer; position: relative; overflow: hidden;
+      box-shadow: 0 4px 18px rgba(26,37,84,.28);
+      transition: transform .15s, box-shadow .15s, opacity .2s;
+    }
+    .btn-submit::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(201,168,76,.18) 50%, transparent 100%);
+      transform: translateX(-100%);
+      transition: transform .5s ease;
+    }
+    .btn-submit:hover::after { transform: translateX(100%); }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 7px 24px rgba(26,37,84,.32); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    /* Spinner */
+    .spin-row {
+      display: none; align-items: center; justify-content: center;
+      gap: 9px; margin-top: 14px; font-size: 13px; color: #8a96a6;
+    }
+    .spin-row.on { display: flex; }
+    .spin-disc {
+      width: 18px; height: 18px; border: 2.5px solid #e4e0d8;
+      border-top-color: var(--gold); border-radius: 50%;
+      animation: rot .7s linear infinite;
+    }
+    @keyframes rot { to { transform: rotate(360deg); } }
+
+    .err { color: #c0392b; font-size: 13px; text-align: center; margin-top: 10px; min-height: 18px; }
+
+    /* ── THANK YOU ── */
+    .thankyou {
+      display: none; width: 100%; max-width: 440px; background: #fff;
+      border-radius: 22px; padding: 48px 24px 40px; text-align: center;
+      box-shadow: 0 6px 30px rgba(26,37,84,.09); border: 1px solid var(--border);
+    }
+    .thankyou.on { display: block; animation: fadeUp .5s ease both; }
+
+    .check-circle {
+      width: 76px; height: 76px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a2554, #2c3f8a);
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-bottom: 22px;
+      box-shadow: 0 5px 18px rgba(26,37,84,.26), 0 0 0 7px rgba(201,168,76,.13);
+      animation: circPop .5s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes circPop {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .check-circle svg { width: 36px; height: 36px; }
+    .check-circle svg polyline {
+      stroke-dasharray: 30; stroke-dashoffset: 30;
+      animation: draw .4s .4s ease forwards;
+    }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+
+    .thankyou h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px; font-weight: 700; color: var(--navy); margin-bottom: 10px;
+    }
+    .thankyou .sub {
+      font-size: 14px; color: #7a8a9e; line-height: 1.7; margin-bottom: 24px; font-weight: 300;
+    }
+
+    .result-box {
+      background: var(--gold-pale); border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px 20px;
+      display: flex; flex-direction: column; gap: 12px;
+      text-align: left; margin-bottom: 28px;
+    }
+    .r-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 14px; color: var(--navy);
+    }
+    .r-stars { color: var(--gold); font-size: 17px; letter-spacing: 1px; }
+
+    .btn-again {
+      padding: 12px 34px; background: transparent;
+      color: var(--navy); font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 500;
+      border: 1.5px solid var(--border); border-radius: 50px; cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+    .btn-again:hover { background: var(--gold-pale); border-color: var(--gold); }
+
+    /* ── FOOTER ── */
+    .footer {
+      margin-top: 26px; font-size: 12px; color: #b8a878;
+      font-family: 'Playfair Display', serif; letter-spacing: 1px;
+      animation: fadeUp .55s .25s ease both;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo-wrap">
+    <img src="logo.png" alt="Roel Joyas"
+         onerror="this.style.display='none';document.getElementById('lf').style.display='flex';" />
+    <div class="logo-fallback" id="lf">
+      <span class="brand">ROEL</span>
+      <span class="sub">Joyas Guadalajara</span>
+    </div>
+  </div>
+  <div class="ornament"><span>✦</span></div>
+  <h1>Cuéntanos tu experiencia con nosotros</h1>
+  <p>Tu opinión nos ayuda a mejorar y brindarte un mejor servicio.<br>Solo toma unos segundos.</p>
+</div>
+
+<!-- CARD -->
+<div class="card" id="formCard">
+
+  <!-- Atención del vendedor -->
+  <div class="rating-block">
+    <div class="block-header">
+      <div class="block-icon icon-s">
+        <svg viewBox="0 0 32 32" width="24" height="24">
+          <circle cx="16" cy="11" r="6" fill="#1a2554"/>
+          <path d="M4 29c0-6.627 5.373-12 12-12s12 5.373 12 12H4z" fill="#1a2554"/>
+        </svg>
+      </div>
+      <div class="block-title">
+        <strong>¿Cómo fue la atención del vendedor?</strong>
+      </div>
+    </div>
+    <div class="stars" id="stars-service" data-cat="service">
+      <span class="star" data-v="1"></span>
+      <span class="star" data-v="2"></span>
+      <span class="star" data-v="3"></span>
+      <span class="star" data-v="4"></span>
+      <span class="star" data-v="5"></span>
+    </div>
+    <p class="rating-hint" id="hint-service">Toca las estrellas para calificar</p>
+  </div>
+
+  <div class="block-divider"><span>✦</span></div>
+
+  <!-- Calidad-Precio -->
+  <div class="rating-block">
+    <div class="block-header">
+      <div class="block-icon icon-p">
+        <svg viewBox="0 0 32 32" width="24" height="24">
+          <path d="M7 4h18l5 9H2L7 4z" fill="#e8c96a"/>
+          <path d="M2 13l14 15 14-15H2z" fill="#c9a84c"/>
+          <line x1="2" y1="13" x2="30" y2="13" stroke="#fff" stroke-width="1" opacity="0.35"/>
+        </svg>
+      </div>
+      <div class="block-title">
+        <strong>¿Cómo fue la calidad y el precio de tu compra?</strong>
+      </div>
+    </div>
+    <div class="stars" id="stars-product" data-cat="product">
+      <span class="star" data-v="1"></span>
+      <span class="star" data-v="2"></span>
+      <span class="star" data-v="3"></span>
+      <span class="star" data-v="4"></span>
+      <span class="star" data-v="5"></span>
+    </div>
+    <p class="rating-hint" id="hint-product">Toca las estrellas para calificar</p>
+  </div>
+
+  <div class="block-divider"><span>✦</span></div>
+
+  <!-- Tiempo de atención -->
+  <div class="rating-block">
+    <div class="block-header">
+      <div class="block-icon icon-t">
+        <svg viewBox="0 0 32 32" width="24" height="24">
+          <circle cx="16" cy="16" r="13" fill="#1a2554"/>
+          <path d="M16 9v7l4.5 4.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="block-title">
+        <strong>¿El tiempo de atención fue adecuado?</strong>
+      </div>
+    </div>
+    <div class="stars" id="stars-time" data-cat="time">
+      <span class="star" data-v="1"></span>
+      <span class="star" data-v="2"></span>
+      <span class="star" data-v="3"></span>
+      <span class="star" data-v="4"></span>
+      <span class="star" data-v="5"></span>
+    </div>
+    <p class="rating-hint" id="hint-time">Toca las estrellas para calificar</p>
+  </div>
+
+  <div class="block-divider"><span>✦</span></div>
+
+  <!-- Comentario -->
+  <div class="comment-row">
+    <label>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1a2554" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      ¿Hay algo que podamos hacer para brindarte una mejor experiencia? Cuéntanos…
+    </label>
+    <span class="opt-badge">Opcional</span>
+  </div>
+  <textarea id="comment"
+    placeholder="(Espacio para comentarios)"></textarea>
+
+  <!-- Botón -->
+  <div class="btn-area">
+    <button class="btn-submit" id="btnSubmit" onclick="submitRating()">
+      Enviar calificación
+    </button>
+  </div>
+  <div class="spin-row" id="spinner">
+    <div class="spin-disc"></div> Guardando tu reseña…
+  </div>
+  <p class="err" id="errMsg"></p>
+</div>
+
+<!-- THANK YOU -->
+<div class="thankyou" id="thankYou">
+  <div class="check-circle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"
+         stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  </div>
+  <h2>¡Gracias por tu confianza!</h2>
+  <p class="sub">Tu reseña fue registrada con éxito.<br>
+    Gracias por ayudarnos a crecer <span style="color:#e91e8c">🩷</span></p>
+  <div class="result-box" id="resultBox"></div>
+  <button class="btn-again" onclick="resetForm()">Calificar de nuevo</button>
+</div>
+
+<p class="footer">✦ &nbsp; Roel Joyas Guadalajara &nbsp; ✦</p>
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+  import { initializeAppCheck, ReCaptchaV3Provider }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app-check.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyBcgbnHMsusXJkiGMWxt3qMD_Z871-2hd4",
+    authDomain:        "qrroel-92f13.firebaseapp.com",
+    projectId:         "qrroel-92f13",
+    storageBucket:     "qrroel-92f13.firebasestorage.app",
+    messagingSenderId: "55171151181",
+    appId:             "1:55171151181:web:7c0dcb1c5195e651aa7304"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // ── App Check (reCAPTCHA v3 invisible) ──
+  initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('6Lf-bREtAAAAAGuwq6t1h3akLvx8yhL52z7Ig09-'),
+    isTokenAutoRefreshEnabled: true   // renueva el token en segundo plano automáticamente
+  });
+
+  const ratings = { service: 0, product: 0, time: 0 };
+  const labels  = {
+    1: "Muy mala 😞",
+    2: "Mala 😕",
+    3: "Regular 😐",
+    4: "Buena 😊",
+    5: "¡Excelente! 🤩"
+  };
+
+  // ── Stars interaction ──
+  document.querySelectorAll('.stars').forEach(group => {
+    const cat   = group.dataset.cat;
+    const stars = [...group.querySelectorAll('.star')];
+    const hint  = document.getElementById('hint-' + cat);
+
+    const paint = (upTo) => {
+      stars.forEach(s => {
+        const v = parseInt(s.dataset.v);
+        s.classList.toggle('active', v <= upTo);
+      });
+    };
+
+    // Touch / click
+    stars.forEach(star => {
+      const val = parseInt(star.dataset.v);
+
+      star.addEventListener('click', () => {
+        ratings[cat] = val;
+        paint(val);
+
+        // bounce animation on clicked star
+        star.classList.remove('pop');
+        void star.offsetWidth; // reflow
+        star.classList.add('pop');
+        star.addEventListener('animationend', () => star.classList.remove('pop'), { once: true });
+
+        hint.textContent = labels[val];
+        hint.classList.add('chosen');
+        document.getElementById('errMsg').textContent = '';
+      });
+
+      // Hover preview (desktop)
+      star.addEventListener('mouseenter', () => {
+        paint(val);
+        hint.textContent = labels[val];
+        hint.classList.add('chosen');
+      });
+    });
+
+    group.addEventListener('mouseleave', () => {
+      paint(ratings[cat]);
+      if (ratings[cat] > 0) {
+        hint.textContent = labels[ratings[cat]];
+        hint.classList.add('chosen');
+      } else {
+        hint.textContent = 'Toca las estrellas para calificar';
+        hint.classList.remove('chosen');
+      }
+    });
+  });
+
+  // ── Anti-spam: cooldown 24 horas por dispositivo ──
+  const COOLDOWN_KEY = 'roel_last_review_bodega';
+  const COOLDOWN_MS  = 24 * 60 * 60 * 1000; // 24 horas
+
+  function checkCooldown() {
+    try {
+      const last = parseInt(localStorage.getItem(COOLDOWN_KEY) || '0', 10);
+      const diff = Date.now() - last;
+      if (diff < COOLDOWN_MS) {
+        const horasRestantes = Math.ceil((COOLDOWN_MS - diff) / 3600000);
+        return `Ya enviaste una calificación. Puedes volver a calificar en ${horasRestantes} hora${horasRestantes !== 1 ? 's' : ''}.`;
+      }
+    } catch (_) { /* localStorage bloqueado en algunos navegadores privados */ }
+    return null;
+  }
+
+  function markCooldown() {
+    try { localStorage.setItem(COOLDOWN_KEY, Date.now().toString()); } catch (_) {}
+  }
+
+  // Mostrar aviso si ya calificaron
+  const cooldownMsg = checkCooldown();
+  if (cooldownMsg) {
+    document.getElementById('btnSubmit').disabled = true;
+    document.getElementById('btnSubmit').textContent = '✓ Ya calificaste hoy';
+    document.getElementById('errMsg').textContent = cooldownMsg;
+  }
+
+  // ── Submit ──
+  window.submitRating = async () => {
+    // Re-verificar cooldown (por si acaso)
+    const cooldown = checkCooldown();
+    if (cooldown) {
+      document.getElementById('errMsg').textContent = cooldown;
+      return;
+    }
+
+    if (!ratings.service || !ratings.product || !ratings.time) {
+      document.getElementById('errMsg').textContent =
+        '⚠ Por favor califica las tres categorías.';
+      return;
+    }
+
+    const btn     = document.getElementById('btnSubmit');
+    const spinner = document.getElementById('spinner');
+    btn.disabled  = true;
+    spinner.classList.add('on');
+    document.getElementById('errMsg').textContent = '';
+
+    try {
+      await addDoc(collection(db, 'resenas_bodega'), {
+        atencion:   ratings.service,
+        producto:   ratings.product,
+        tiempo:     ratings.time,
+        comentario: document.getElementById('comment').value.trim(),
+        fecha:      serverTimestamp()
+      });
+
+      const filled  = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+      const comment = document.getElementById('comment').value.trim();
+
+      document.getElementById('resultBox').innerHTML = `
+        <div class="r-row">
+          <span style="display:flex;align-items:center;gap:7px">
+            <svg viewBox="0 0 32 32" width="16" height="16"><circle cx="16" cy="11" r="6" fill="#1a2554"/><path d="M4 29c0-6.627 5.373-12 12-12s12 5.373 12 12H4z" fill="#1a2554"/></svg>
+            Atención del vendedor
+          </span>
+          <span class="r-stars">${filled(ratings.service)}</span>
+        </div>
+        <div class="r-row">
+          <span style="display:flex;align-items:center;gap:7px">
+            <svg viewBox="0 0 32 32" width="16" height="16"><path d="M7 4h18l5 9H2L7 4z" fill="#e8c96a"/><path d="M2 13l14 15 14-15H2z" fill="#c9a84c"/></svg>
+            Calidad-Precio
+          </span>
+          <span class="r-stars">${filled(ratings.product)}</span>
+        </div>
+        <div class="r-row">
+          <span style="display:flex;align-items:center;gap:7px">
+            <svg viewBox="0 0 32 32" width="16" height="16"><circle cx="16" cy="16" r="13" fill="#1a2554"/><path d="M16 9v7l4.5 4.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            Tiempo de atención
+          </span>
+          <span class="r-stars">${filled(ratings.time)}</span>
+        </div>
+        ${comment ? `
+          <div style="border-top:1px solid rgba(201,168,76,.2);padding-top:12px;margin-top:2px">
+            <div style="font-size:11px;color:#9aa5b4;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Tu comentario</div>
+            <div style="font-size:13px;color:#3a4a5e;font-style:italic;line-height:1.6">"${comment}"</div>
+          </div>` : ''}
+      `;
+
+      markCooldown(); // Registrar hora de envío para el cooldown
+      document.getElementById('formCard').classList.add('hidden');
+      document.getElementById('thankYou').classList.add('on');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (err) {
+      console.error(err);
+      document.getElementById('errMsg').textContent = '❌ Error al guardar. Intenta de nuevo.';
+      btn.disabled = false;
+    } finally {
+      spinner.classList.remove('on');
+    }
+  };
+
+  // ── Reset ──
+  window.resetForm = () => {
+    ratings.service = 0; ratings.product = 0; ratings.time = 0;
+    document.querySelectorAll('.star').forEach(s => s.classList.remove('active', 'pop'));
+    ['service', 'product', 'time'].forEach(c => {
+      const h = document.getElementById('hint-' + c);
+      h.textContent = 'Toca las estrellas para calificar';
+      h.classList.remove('chosen');
+    });
+    document.getElementById('comment').value       = '';
+    document.getElementById('errMsg').textContent  = '';
+    document.getElementById('btnSubmit').disabled  = false;
+    document.getElementById('formCard').classList.remove('hidden');
+    document.getElementById('thankYou').classList.remove('on');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+</script>
+</body>
+</html>

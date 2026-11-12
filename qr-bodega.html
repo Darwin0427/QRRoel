@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QR Calificación – Roel Bodega</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .page-title {
+      font-size: 18px;
+      color: #5a6a7e;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .page-title strong { color: #1a2e4a; }
+
+    /* ── QR Card ── */
+    .qr-card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 36px 40px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      max-width: 380px;
+      width: 100%;
+    }
+
+    .brand-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+    .logo-img-wrap {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid #c9a84c;
+      box-shadow: 0 4px 20px rgba(201,168,76,0.25), 0 2px 8px rgba(26,46,74,0.15);
+    }
+    .logo-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #1a2e4a;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+    }
+    .brand-tagline {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #c9a84c;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .brand-divider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 80%;
+    }
+    .brand-divider::before,
+    .brand-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #c9a84c, transparent);
+    }
+    .brand-divider span {
+      color: #c9a84c;
+      font-size: 11px;
+    }
+
+    #qrcode {
+      padding: 12px;
+      background: #fff;
+      border: 2px solid #eef0f3;
+      border-radius: 16px;
+    }
+    #qrcode canvas, #qrcode img { display: block; border-radius: 8px; }
+
+    .cta-text {
+      text-align: center;
+    }
+    .cta-text p {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a2e4a;
+      margin-bottom: 4px;
+    }
+    .cta-text span {
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: #8a96a6;
+    }
+
+    .icons-row {
+      display: flex;
+      gap: 20px;
+      color: #5a6a7e;
+      font-size: 13px;
+    }
+    .icon-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .icon-item .emoji { font-size: 22px; }
+
+    /* ── URL input ── */
+    .url-section {
+      margin-top: 32px;
+      width: 100%;
+      max-width: 380px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+    .url-section label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #5a6a7e;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .url-row {
+      display: flex;
+      gap: 8px;
+    }
+    .url-row input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1.5px solid #dde2ea;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #1a2e4a;
+      outline: none;
+      font-family: monospace;
+    }
+    .url-row input:focus { border-color: #2d7dd2; }
+    .btn-update {
+      padding: 10px 16px;
+      background: #1a4fa0;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-update:hover { background: #2d7dd2; }
+    .url-hint {
+      font-size: 11px;
+      color: #9aa5b4;
+      margin-top: 6px;
+    }
+
+    /* Print button */
+    .btn-print {
+      margin-top: 20px;
+      padding: 12px 36px;
+      background: linear-gradient(135deg,#1a4fa0,#2d7dd2);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(26,79,160,0.3);
+    }
+    .btn-print:hover { opacity: 0.9; }
+
+    /* Print styles */
+    @media print {
+      body { background: #fff; padding: 0; justify-content: center; }
+      .url-section, .btn-print, .page-title { display: none; }
+      .qr-card { box-shadow: none; border: 2px solid #eee; }
+    }
+  </style>
+</head>
+<body>
+
+  <p class="page-title">Página de administración &nbsp;·&nbsp; <strong>Roel</strong> &nbsp;·&nbsp; Bodega</p>
+
+  <div class="qr-card">
+    <div class="brand-header">
+      <div class="logo-img-wrap">
+        <img src="LogoRoel.jpeg" alt="Roel Joyas" />
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">Roel</div>
+        <div class="brand-divider"><span>✦</span></div>
+        <div class="brand-tagline">Bodega</div>
+      </div>
+    </div>
+
+    <div id="qrcode"></div>
+
+    <div class="cta-text">
+      <p>Escanea y califica</p>
+      <span>Tu opinión nos importa</span>
+    </div>
+
+    <div class="icons-row">
+      <div class="icon-item">
+        <svg viewBox="0 0 32 32" width="28" height="28">
+          <circle cx="16" cy="11" r="6" fill="#1a2e4a"/>
+          <path d="M4 29c0-6.627 5.373-12 12-12s12 5.373 12 12H4z" fill="#1a2e4a"/>
+        </svg>
+        <span>Atención</span>
+      </div>
+      <div class="icon-item">
+        <svg viewBox="0 0 32 32" width="28" height="28">
+          <path d="M7 4h18l5 9H2L7 4z" fill="#e8c96a"/>
+          <path d="M2 13l14 15 14-15H2z" fill="#c9a84c"/>
+          <line x1="2" y1="13" x2="30" y2="13" stroke="#fff" stroke-width="1" opacity="0.35"/>
+        </svg>
+        <span>Precio</span>
+      </div>
+      <div class="icon-item">
+        <svg viewBox="0 0 32 32" width="28" height="28">
+          <path d="M16 2l3.09 6.26L26 9.27l-5 4.87 1.18 6.88L16 17.77l-6.18 3.25L11 14.14 6 9.27l6.91-1.01L16 2z" fill="#c9a84c"/>
+        </svg>
+        <span>Califica</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- URL updater -->
+  <div class="url-section">
+    <label>🔗 URL de la página de calificación</label>
+    <div class="url-row">
+      <input type="text" id="urlInput" placeholder="https://tu-sitio.com/calificacion-bodega.html" />
+      <button class="btn-update" onclick="updateQR()">Actualizar QR</button>
+    </div>
+    <p class="url-hint">
+      Ingresa la URL donde esté publicada la página <strong>calificacion-bodega.html</strong> y el QR se actualizará automáticamente.
+    </p>
+  </div>
+
+  <button class="btn-print" onclick="window.print()">🖨️ Imprimir QR</button>
+
+<script>
+  let qr = null;
+
+  function generateQR(url) {
+    const container = document.getElementById('qrcode');
+    container.innerHTML = '';
+    qr = new QRCode(container, {
+      text: url,
+      width: 220,
+      height: 220,
+      colorDark: '#1a2e4a',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+
+  function updateQR() {
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) { alert('Por favor ingresa una URL válida.'); return; }
+    generateQR(url);
+  }
+
+  // Default: generate QR for la página de bodega
+  const defaultUrl = 'https://tuopinionroel.web.app/calificacion-bodega.html';
+  document.getElementById('urlInput').value = defaultUrl;
+  generateQR(defaultUrl);
+</script>
+</body>
+</html>

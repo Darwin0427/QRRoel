@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard – Roel Joyas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --navy:       #1a2554;
+      --navy2:      #2c3f8a;
+      --gold:       #c9a84c;
+      --gold-pale:  #fdf8ee;
+      --gold-light: #e8c96a;
+      --cream:      #f5f2ec;
+      --border:     rgba(201,168,76,.2);
+      --sidebar-w:  240px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--navy); }
+
+    /* ════════════════════════════════
+       LOGIN
+    ════════════════════════════════ */
+    #loginScreen {
+      min-height: 100vh; display: flex; align-items: center;
+      justify-content: center; padding: 24px;
+      background: var(--cream);
+      background-image: radial-gradient(ellipse at top, rgba(201,168,76,.08) 0%, transparent 55%);
+    }
+    .login-box {
+      background: #fff; border-radius: 24px; padding: 44px 36px;
+      max-width: 360px; width: 100%;
+      box-shadow: 0 8px 40px rgba(26,37,84,.12); border: 1px solid var(--border);
+      text-align: center;
+    }
+    .login-box img { max-width: 170px; margin-bottom: 10px; }
+    .login-box .brand-fb { display: none; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 10px; }
+    .login-box .brand-fb .b { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; color: var(--navy); letter-spacing: 7px; }
+    .login-box .brand-fb .s { font-size: 10px; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; }
+    .ornament { display: flex; align-items: center; gap: 10px; margin: 14px auto 18px; max-width: 180px; }
+    .ornament::before, .ornament::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); }
+    .ornament span { color: var(--gold); font-size: 12px; }
+    .login-box h2 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--navy); margin-bottom: 5px; }
+    .login-box p { font-size: 13px; color: #8a96a6; margin-bottom: 24px; font-weight: 300; }
+    .login-box input[type="email"],
+    .login-box input[type="password"] {
+      width: 100%; padding: 13px 16px; border: 1.5px solid #e4e0d8;
+      border-radius: 50px; font-size: 14px; outline: none; font-family: inherit;
+      color: var(--navy); background: #fdfcf9; margin-bottom: 12px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .login-box input[type="password"] { text-align: center; letter-spacing: 3px; }
+    .login-box input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,.12); }
+    .btn-login {
+      width: 100%; padding: 13px; background: linear-gradient(135deg, var(--navy), var(--navy2));
+      color: #fff; font-size: 14px; font-weight: 600; letter-spacing: 1px;
+      text-transform: uppercase; border: none; border-radius: 50px; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(26,37,84,.26); transition: opacity .2s, transform .15s;
+    }
+    .btn-login:hover { opacity: .92; transform: translateY(-1px); }
+    .login-err { color: #c0392b; font-size: 13px; margin-top: 10px; min-height: 18px; }
+
+    /* ════════════════════════════════
+       LAYOUT
+    ════════════════════════════════ */
+    #app { display: none; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: var(--sidebar-w);
+      background: linear-gradient(180deg, var(--navy) 0%, #111b42 100%);
+      display: flex; flex-direction: column;
+      padding: 28px 0; z-index: 100;
+      box-shadow: 2px 0 20px rgba(26,37,84,.25);
+    }
+    .sidebar-logo {
+      padding: 0 24px 24px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      text-align: center;
+    }
+    .sidebar-logo img { max-width: 130px; filter: brightness(0) invert(1) opacity(.9); }
+    .sidebar-logo .brand-sb { display: none; flex-direction: column; align-items: center; gap: 2px; }
+    .sidebar-logo .brand-sb .b { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: #fff; letter-spacing: 5px; }
+    .sidebar-logo .brand-sb .s { font-size: 9px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; }
+
+    .sidebar-gold { width: 40px; height: 1px; background: var(--gold); margin: 20px auto 0; opacity: .5; }
+
+    .sidebar-section { padding: 20px 16px 8px; font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,.35); text-transform: uppercase; }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 20px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,.65);
+      cursor: pointer; transition: background .15s, color .15s; border-radius: 0;
+      border-left: 3px solid transparent; margin: 1px 0;
+    }
+    .sidebar-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.9); }
+    .sidebar-item.active { background: rgba(201,168,76,.12); color: #fff; border-left-color: var(--gold); }
+    .sidebar-item .si { font-size: 16px; width: 20px; text-align: center; }
+
+    .sucursal-switch {
+      display: flex; gap: 4px;
+      background: rgba(255,255,255,.06); border-radius: 10px;
+      padding: 3px; margin: 16px 16px 4px;
+    }
+    .sucursal-switch-btn {
+      flex: 1; border: none; background: transparent; cursor: pointer;
+      padding: 8px 6px; font-size: 12px; font-weight: 600; font-family: inherit;
+      color: rgba(255,255,255,.6); border-radius: 8px; transition: background .15s, color .15s;
+    }
+    .sucursal-switch-btn:hover { color: rgba(255,255,255,.9); }
+    .sucursal-switch-btn.active { background: var(--gold); color: #4a3c12; }
+
+    .sidebar-bottom {
+      margin-top: auto; padding: 16px;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .btn-logout-sb {
+      width: 100%; padding: 10px; background: rgba(255,255,255,.07);
+      color: rgba(255,255,255,.65); font-size: 13px; font-weight: 500;
+      border: 1px solid rgba(255,255,255,.1); border-radius: 10px; cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .btn-logout-sb:hover { background: rgba(255,255,255,.13); color: #fff; }
+
+    /* Main content */
+    .main {
+      margin-left: var(--sidebar-w);
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+
+    /* Topbar */
+    .topbar {
+      background: #fff; border-bottom: 1px solid #eee;
+      padding: 16px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+      box-shadow: 0 1px 8px rgba(26,37,84,.06);
+    }
+    .topbar-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--navy); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .last-updated { font-size: 12px; color: #9aa5b4; }
+    .btn-refresh {
+      padding: 8px 18px; background: var(--gold-pale);
+      color: var(--gold); font-size: 13px; font-weight: 600;
+      border: 1px solid var(--border); border-radius: 50px; cursor: pointer;
+      transition: background .15s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-refresh:hover { background: #f5edcc; }
+    .btn-refresh.spinning .ri { animation: rot .7s linear infinite; }
+    @keyframes rot { to { transform: rotate(360deg); } }
+
+    /* Content area */
+    .content { padding: 28px; flex: 1; }
+
+    /* ════════════════════════════════
+       STAT CARDS
+    ════════════════════════════════ */
+    .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      background: #fff; border-radius: 18px; padding: 22px 20px;
+      border: 1px solid #eeebe4;
+      box-shadow: 0 2px 12px rgba(26,37,84,.06);
+      display: flex; flex-direction: column; gap: 6px;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,37,84,.10); }
+    .stat-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .stat-icon-box {
+      width: 42px; height: 42px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .si-total   { background: #eef1fb; }
+    .si-service { background: var(--gold-pale); }
+    .si-product { background: #eef8f1; }
+    .si-time    { background: #eef3fb; }
+    .si-avg     { background: #fdf0f0; }
+
+    .stat-badge {
+      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+    }
+    .badge-good   { background: #e6f9ee; color: #27ae60; }
+    .badge-great  { background: var(--gold-pale); color: var(--gold); }
+    .badge-total  { background: #eef1fb; color: var(--navy2); }
+
+    .stat-num {
+      font-size: 36px; font-weight: 700; color: var(--navy);
+      font-family: 'Inter', sans-serif; line-height: 1; margin-top: 8px;
+    }
+    .stat-label { font-size: 13px; color: #8a96a6; font-weight: 400; }
+    .stat-stars { color: var(--gold); font-size: 15px; letter-spacing: 1px; }
+
+    /* ════════════════════════════════
+       CHARTS
+    ════════════════════════════════ */
+    .charts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .chart-card {
+      background: #fff; border-radius: 18px; padding: 24px;
+      border: 1px solid #eeebe4; box-shadow: 0 2px 12px rgba(26,37,84,.06);
+    }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .chart-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; color: var(--navy); }
+    .chart-sub { font-size: 12px; color: #9aa5b4; margin-top: 2px; }
+    .chart-icon { font-size: 22px; }
+    .chart-canvas-wrap { position: relative; height: 180px; }
+
+    /* ════════════════════════════════
+       REVIEWS SECTION
+    ════════════════════════════════ */
+    .reviews-card {
+      background: #fff; border-radius: 18px; padding: 24px;
+      border: 1px solid #eeebe4; box-shadow: 0 2px 12px rgba(26,37,84,.06);
+    }
+    .reviews-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+    }
+    .reviews-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 10px; }
+    .count-pill { background: var(--gold-pale); color: var(--gold); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; padding: 3px 12px; border-radius: 20px; border: 1px solid var(--border); }
+
+    /* Toolbar */
+    .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+    /* Custom dropdown */
+    .dd-wrap { position: relative; }
+    .dd-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px 8px 16px;
+      border: 1.5px solid #e4e0d8; border-radius: 50px;
+      font-size: 13px; font-family: inherit; font-weight: 500;
+      color: var(--navy); background: #fdfcf9; cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+      white-space: nowrap; user-select: none;
+    }
+    .dd-btn:hover { border-color: var(--gold); }
+    .dd-btn.open { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,.12); }
+    .dd-chevron {
+      width: 14px; height: 14px; flex-shrink: 0;
+      transition: transform .2s;
+    }
+    .dd-btn.open .dd-chevron { transform: rotate(180deg); }
+    .dd-menu {
+      display: none; position: absolute; top: calc(100% + 6px); left: 0;
+      min-width: 100%; background: #fff;
+      border: 1.5px solid #e8e4dc; border-radius: 14px;
+      box-shadow: 0 8px 28px rgba(26,37,84,.13);
+      overflow: hidden; z-index: 100;
+    }
+    .dd-menu.open { display: block; }
+    .dd-opt {
+      padding: 10px 16px; font-size: 13px; font-weight: 500;
+      color: var(--navy); cursor: pointer;
+      transition: background .12s, color .12s;
+      white-space: nowrap;
+    }
+    .dd-opt:hover { background: var(--gold-pale); }
+    .dd-opt.active {
+      background: var(--navy); color: #fff; font-weight: 600;
+    }
+
+    .btn-export {
+      padding: 8px 18px;
+      background: linear-gradient(135deg, var(--navy), var(--navy2));
+      color: #fff; font-size: 13px; font-weight: 600;
+      border: none; border-radius: 50px; cursor: pointer;
+      transition: opacity .15s, transform .15s;
+      display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 2px 10px rgba(26,37,84,.2);
+    }
+    .btn-export:hover { opacity: .9; transform: translateY(-1px); }
+
+    /* Review items */
+    .review-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .review-item {
+      border: 1px solid #eeebe4; border-radius: 14px; padding: 18px 20px;
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 12px; align-items: start;
+      border-left: 4px solid transparent;
+      transition: box-shadow .15s, transform .15s;
+    }
+    .review-item:hover { box-shadow: 0 4px 16px rgba(26,37,84,.07); transform: translateX(2px); }
+    .review-item.c5 { border-left-color: #27ae60; }
+    .review-item.c4 { border-left-color: #2980b9; }
+    .review-item.c3 { border-left-color: var(--gold); }
+    .review-item.c2 { border-left-color: #e67e22; }
+    .review-item.c1 { border-left-color: #c0392b; }
+
+    .review-cats { display: flex; flex-direction: column; gap: 8px; }
+    .rcat { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--navy); }
+    .rcat .label { width: 145px; color: #6a7a8e; display: flex; align-items: center; gap: 5px; }
+    .rcat .stars-val { color: var(--gold); font-size: 15px; letter-spacing: 1px; }
+    .rcat .num { font-weight: 700; font-size: 13px; color: var(--navy); }
+
+    .review-comment {
+      margin-top: 10px; font-size: 13px; color: #5a6a7e;
+      font-style: italic; line-height: 1.6;
+      background: var(--gold-pale); border-radius: 10px;
+      padding: 10px 14px; border-left: 3px solid var(--border);
+    }
+    .review-comment::before { content: '"'; }
+    .review-comment::after  { content: '"'; }
+
+    .review-meta { text-align: right; flex-shrink: 0; }
+    .review-date { font-size: 11px; color: #9aa5b4; margin-bottom: 6px; line-height: 1.4; }
+    .avg-pill {
+      display: inline-block; background: var(--gold-pale); color: #8a6a20;
+      font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex; justify-content: center; align-items: center;
+      gap: 8px; margin-top: 20px;
+    }
+    .page-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1.5px solid #e4e0d8; background: #fff;
+      font-size: 13px; font-weight: 600; color: var(--navy);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+    }
+    .page-btn:hover { border-color: var(--gold); background: var(--gold-pale); }
+    .page-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .page-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+    /* Empty / loading */
+    .empty-state, .loading-state {
+      text-align: center; padding: 56px 24px; color: #9aa5b4;
+    }
+    .empty-state .e-icon, .loading-state .l-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p, .loading-state p { font-size: 15px; }
+    .spin-big {
+      width: 36px; height: 36px; border: 3px solid #e4e0d8;
+      border-top-color: var(--gold); border-radius: 50%;
+      animation: rot .7s linear infinite; margin: 0 auto 14px;
+    }
+
+    /* ════════════════════════════════
+       DATE FILTER BAR
+    ════════════════════════════════ */
+    /* Filtros de fecha */
+    .date-filter-wrap { margin-bottom: 20px; }
+
+    .date-filter-bar {
+      display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+      background: #fff; border-radius: 16px; padding: 10px 14px;
+      border: 1px solid #eeebe4;
+      box-shadow: 0 2px 10px rgba(26,37,84,.05);
+    }
+    .df-divider {
+      width: 1px; height: 20px; background: #e4e0d8; margin: 0 4px; flex-shrink: 0;
+    }
+    .df-btn {
+      padding: 6px 14px;
+      border: none; border-radius: 50px;
+      font-size: 12px; font-weight: 600; font-family: inherit;
+      color: #8a96a6; background: transparent; cursor: pointer;
+      transition: all .15s; white-space: nowrap;
+    }
+    .df-btn:hover { background: var(--gold-pale); color: var(--navy); }
+    .df-btn.active {
+      background: var(--navy); color: #fff;
+      box-shadow: 0 2px 8px rgba(26,37,84,.22);
+    }
+    .df-btn-custom {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border: 1.5px dashed #d4cfc6; border-radius: 50px;
+      font-size: 12px; font-weight: 600; font-family: inherit;
+      color: #8a96a6; background: transparent; cursor: pointer;
+      transition: all .15s; white-space: nowrap;
+    }
+    .df-btn-custom:hover { border-color: var(--gold); color: var(--navy); }
+    .df-btn-custom.active {
+      border-style: solid; border-color: var(--gold);
+      background: var(--gold-pale); color: var(--navy);
+    }
+
+    /* Panel expandible de rango personalizado */
+    .custom-range-panel {
+      display: none; margin-top: 8px;
+      background: #fff; border-radius: 16px; padding: 16px 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(26,37,84,.08);
+      animation: slideDown .2s ease;
+    }
+    .custom-range-panel.open { display: block; }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .crp-inner {
+      display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap;
+    }
+    .crp-field { display: flex; flex-direction: column; gap: 5px; }
+    .crp-field label {
+      font-size: 11px; font-weight: 600; letter-spacing: .5px;
+      color: #8a96a6; text-transform: uppercase;
+    }
+    .crp-field input[type="date"] {
+      padding: 9px 14px; border: 1.5px solid #e4e0d8; border-radius: 12px;
+      font-size: 13px; font-family: inherit; color: var(--navy);
+      outline: none; background: #fdfcf9; cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .crp-field input[type="date"]:focus {
+      border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,.12);
+    }
+    .crp-field input[type="date"]::-webkit-calendar-picker-indicator {
+      color: var(--gold); cursor: pointer; opacity: .7;
+    }
+    .crp-sep {
+      font-size: 18px; color: #d4cfc6; padding-bottom: 9px; flex-shrink: 0;
+    }
+    .crp-actions { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; padding-bottom: 1px; }
+    .btn-apply-range {
+      padding: 10px 22px;
+      background: linear-gradient(135deg, var(--navy), var(--navy2));
+      color: #fff; font-size: 13px; font-weight: 600; font-family: inherit;
+      border: none; border-radius: 50px; cursor: pointer;
+      box-shadow: 0 2px 10px rgba(26,37,84,.2);
+      transition: opacity .15s, transform .1s;
+    }
+    .btn-apply-range:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-clear-range {
+      padding: 10px 16px; background: transparent;
+      color: #9aa5b4; font-size: 13px; font-weight: 500; font-family: inherit;
+      border: 1.5px solid #e4e0d8; border-radius: 50px; cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-clear-range:hover { border-color: #c0392b; color: #c0392b; }
+
+    /* ════════════════════════════════
+       RESPONSIVE
+    ════════════════════════════════ */
+
+    /* Hamburger button */
+    .hamburger {
+      display: none; background: none; border: none;
+      cursor: pointer; padding: 6px; color: var(--navy);
+    }
+
+    /* Mobile overlay */
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(26,37,84,.45); z-index: 90;
+    }
+    .sidebar-overlay.open { display: block; }
+
+    @media (max-width: 1180px) {
+      .stats-grid  { grid-template-columns: repeat(3, 1fr); }
+      .charts-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 240px; }
+
+      /* Sidebar: off-canvas en móvil */
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+        z-index: 100;
+      }
+      .sidebar.open { transform: translateX(0); }
+
+      /* Main ocupa todo el ancho */
+      .main { margin-left: 0; }
+
+      /* Topbar: mostrar hamburguesa */
+      .hamburger { display: flex; align-items: center; justify-content: center; }
+      .topbar {
+        padding: 12px 16px;
+        gap: 10px;
+      }
+      .topbar-title { font-size: 16px; }
+      .last-updated { display: none; }
+
+      /* Content */
+      .content { padding: 16px; }
+
+      /* Stat cards: 2 columnas en tablet, 1 en móvil pequeño */
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .stat-num { font-size: 28px; }
+
+      /* Charts: 1 columna */
+      .charts-grid { grid-template-columns: 1fr; }
+
+      /* Reviews header: apilado */
+      .reviews-header { flex-direction: column; align-items: flex-start; }
+      .toolbar { width: 100%; }
+
+      /* Dropdowns que ocupan más espacio */
+      .dd-btn { flex: 1; justify-content: space-between; }
+      .btn-export { width: 100%; justify-content: center; }
+
+      /* Review item: simplificar en móvil */
+      .review-item { grid-template-columns: 1fr; }
+      .review-meta { text-align: left; display: flex; align-items: center; gap: 10px; }
+
+      /* Date filter: scroll horizontal */
+      .date-filter-bar { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+      .date-filter-bar::-webkit-scrollbar { height: 0; }
+    }
+
+    @media (max-width: 420px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-card { padding: 16px 14px; }
+      .stat-num { font-size: 24px; }
+      .stat-icon-box { width: 36px; height: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     LOGIN
+══════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <img src="logo.png" alt="Roel"
+         onerror="this.style.display='none';document.getElementById('lbf').style.display='flex';" />
+    <div class="brand-fb" id="lbf">
+      <span class="b">ROEL</span>
+      <span class="s">Joyas Guadalajara</span>
+    </div>
+    <div class="ornament"><span>✦</span></div>
+    <h2>Panel de Monitoreo</h2>
+    <p>Acceso exclusivo para el equipo Roel</p>
+    <input type="email" id="emailInput" placeholder="correo@roel.com"
+           onkeydown="if(event.key==='Enter') document.getElementById('passInput').focus()" />
+    <input type="password" id="passInput" placeholder="••••••••"
+           onkeydown="if(event.key==='Enter') doLogin()" />
+    <button class="btn-login" id="btnLogin" onclick="doLogin()">Entrar al panel</button>
+    <p class="login-err" id="loginErr"></p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     APP
+══════════════════════════════ -->
+<div id="app">
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="logo.png" alt="Roel"
+           onerror="this.style.display='none';document.getElementById('sbf').style.display='flex';" />
+      <div class="brand-sb" id="sbf">
+        <span class="b">ROEL</span>
+        <span class="s">Joyas</span>
+      </div>
+      <div class="sidebar-gold"></div>
+    </div>
+
+    <div class="sucursal-switch">
+      <button class="sucursal-switch-btn active" id="sucTienda" onclick="setSucursal('tienda', this)">Tienda Principal</button>
+      <button class="sucursal-switch-btn" id="sucBodega" onclick="setSucursal('bodega', this)">Bodega</button>
+    </div>
+
+    <div class="sidebar-section">Navegación</div>
+    <div class="sidebar-item active">
+      <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg></span>
+      Dashboard
+    </div>
+    <div class="sidebar-item" id="linkCliente" onclick="openCliente()">
+      <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
+      Ver página cliente
+    </div>
+    <div class="sidebar-item" id="linkQR" onclick="openQR()">
+      <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3" rx=".5" fill="currentColor"/><path d="M17 17h3v3"/><path d="M6 6h1v1H6z" fill="currentColor" stroke="none"/><path d="M6 17h1v1H6z" fill="currentColor" stroke="none"/><path d="M17 6h1v1h-1z" fill="currentColor" stroke="none"/></svg></span>
+      Código QR
+    </div>
+
+    <div class="sidebar-bottom">
+      <button class="btn-logout-sb" onclick="doLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="vertical-align:middle;margin-right:5px"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()" aria-label="Menú">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <div class="topbar-title" id="topbarTitle">Resumen de calificaciones — Tienda Principal</div>
+      <div class="topbar-right">
+        <span class="last-updated" id="lastUpdated">—</span>
+        <button class="btn-refresh" id="btnRefresh" onclick="loadData()">
+          <span class="ri">↻</span> Actualizar
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- DATE FILTER -->
+      <div class="date-filter-wrap">
+        <div class="date-filter-bar">
+          <button class="df-btn active" data-range="all"   onclick="pickDate(this)">Todas</button>
+          <button class="df-btn"        data-range="today" onclick="pickDate(this)">Hoy</button>
+          <button class="df-btn"        data-range="week"  onclick="pickDate(this)">Esta semana</button>
+          <button class="df-btn"        data-range="month" onclick="pickDate(this)">Este mes</button>
+          <button class="df-btn"        data-range="3m"    onclick="pickDate(this)">Últimos 3 meses</button>
+          <button class="df-btn"        data-range="year"  onclick="pickDate(this)">Este año</button>
+          <div class="df-divider"></div>
+          <button class="df-btn-custom" id="btnCustomRange" onclick="toggleCustomPanel()">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" width="13" height="13">
+              <rect x="1" y="2" width="14" height="13" rx="2"/>
+              <path d="M1 6h14M5 1v2M11 1v2"/>
+            </svg>
+            Rango personalizado
+          </button>
+        </div>
+
+        <!-- Panel expandible -->
+        <div class="custom-range-panel" id="customRangePanel">
+          <div class="crp-inner">
+            <div class="crp-field">
+              <label>Desde</label>
+              <input type="date" id="dateFrom" />
+            </div>
+            <div class="crp-sep">→</div>
+            <div class="crp-field">
+              <label>Hasta</label>
+              <input type="date" id="dateTo" />
+            </div>
+            <div class="crp-actions">
+              <button class="btn-apply-range" onclick="applyCustomRange()">Aplicar filtro</button>
+              <button class="btn-clear-range" onclick="clearCustomRange()">Limpiar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-box si-total">
+              <svg viewBox="0 0 32 32" width="22" height="22">
+                <rect x="6" y="4" width="20" height="24" rx="3" fill="#6c7ae0"/>
+                <rect x="10" y="2" width="12" height="5" rx="2" fill="#4a5bc4"/>
+                <rect x="10" y="13" width="12" height="2" rx="1" fill="#fff" opacity=".9"/>
+                <rect x="10" y="18" width="8" height="2" rx="1" fill="#fff" opacity=".6"/>
+                <rect x="10" y="23" width="10" height="2" rx="1" fill="#fff" opacity=".6"/>
+              </svg>
+            </div>
+            <span class="stat-badge badge-total" id="badgeTotal">—</span>
+          </div>
+          <div class="stat-num" id="statTotal">—</div>
+          <div class="stat-label">Total de reseñas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-box si-service">
+              <svg viewBox="0 0 32 32" width="22" height="22">
+                <circle cx="16" cy="11" r="6" fill="#1a2554"/>
+                <path d="M4 29c0-6.627 5.373-12 12-12s12 5.373 12 12H4z" fill="#1a2554"/>
+              </svg>
+            </div>
+            <span class="stat-badge badge-great" id="badgeService">—</span>
+          </div>
+          <div class="stat-num" id="statService">—</div>
+          <div class="stat-stars" id="starsService"></div>
+          <div class="stat-label" id="labelService">Atención al cliente</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-box si-product">
+              <svg viewBox="0 0 32 32" width="22" height="22">
+                <path d="M7 5h18l5 9H2L7 5z" fill="#e8c96a"/>
+                <path d="M2 14l14 14 14-14H2z" fill="#c9a84c"/>
+                <line x1="2" y1="14" x2="30" y2="14" stroke="#fff" stroke-width="1" opacity="0.4"/>
+              </svg>
+            </div>
+            <span class="stat-badge badge-great" id="badgeProduct">—</span>
+          </div>
+          <div class="stat-num" id="statProduct">—</div>
+          <div class="stat-stars" id="starsProduct"></div>
+          <div class="stat-label" id="labelProduct">Calidad de la joya</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-box si-time">
+              <svg viewBox="0 0 32 32" width="22" height="22">
+                <circle cx="16" cy="16" r="13" fill="#1a2554"/>
+                <path d="M16 9v7l4.5 4.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+            </div>
+            <span class="stat-badge badge-great" id="badgeTime">—</span>
+          </div>
+          <div class="stat-num" id="statTime">—</div>
+          <div class="stat-stars" id="starsTime"></div>
+          <div class="stat-label">Tiempo de atención</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon-box si-avg">
+              <svg viewBox="0 0 32 32" width="22" height="22">
+                <path d="M16 3l3.09 6.26L26 10.27l-5 4.87 1.18 6.88L16 18.77l-6.18 3.25L11 15.14 6 10.27l6.91-1.01L16 3z" fill="#c9a84c"/>
+              </svg>
+            </div>
+            <span class="stat-badge badge-good" id="badgeAvg">—</span>
+          </div>
+          <div class="stat-num" id="statAvg">—</div>
+          <div class="stat-stars" id="starsAvg"></div>
+          <div class="stat-label">Promedio general</div>
+        </div>
+      </div>
+
+      <!-- CHARTS -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title" style="display:flex;align-items:center;gap:7px;">
+                <svg viewBox="0 0 32 32" width="17" height="17" style="flex-shrink:0">
+                  <circle cx="16" cy="11" r="6" fill="#1a2554"/>
+                  <path d="M4 29c0-6.627 5.373-12 12-12s12 5.373 12 12H4z" fill="#1a2554"/>
+                </svg>
+                <span id="chartTitleService">Atención al cliente</span>
+              </div>
+              <div class="chart-sub">Distribución de calificaciones</div>
+            </div>
+            <div class="chart-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22">
+                <rect x="3" y="12" width="4" height="9" rx="1" fill="#1a2554" opacity=".7"/>
+                <rect x="10" y="7" width="4" height="14" rx="1" fill="#c9a84c"/>
+                <rect x="17" y="3" width="4" height="18" rx="1" fill="#1a2554"/>
+              </svg>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chartService"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title" style="display:flex;align-items:center;gap:7px;">
+                <svg viewBox="0 0 32 32" width="17" height="17" style="flex-shrink:0">
+                  <path d="M7 5h18l5 9H2L7 5z" fill="#e8c96a"/>
+                  <path d="M2 14l14 14 14-14H2z" fill="#c9a84c"/>
+                </svg>
+                <span id="chartTitleProduct">Calidad de la joya</span>
+              </div>
+              <div class="chart-sub">Distribución de calificaciones</div>
+            </div>
+            <div class="chart-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22">
+                <rect x="3" y="12" width="4" height="9" rx="1" fill="#1a2554" opacity=".7"/>
+                <rect x="10" y="7" width="4" height="14" rx="1" fill="#c9a84c"/>
+                <rect x="17" y="3" width="4" height="18" rx="1" fill="#1a2554"/>
+              </svg>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chartProduct"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title" style="display:flex;align-items:center;gap:7px;">
+                <svg viewBox="0 0 32 32" width="17" height="17" style="flex-shrink:0">
+                  <circle cx="16" cy="16" r="13" fill="#1a2554"/>
+                  <path d="M16 9v7l4.5 4.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                </svg>
+                Tiempo de atención
+              </div>
+              <div class="chart-sub">Distribución de calificaciones</div>
+            </div>
+            <div class="chart-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22">
+                <rect x="3" y="12" width="4" height="9" rx="1" fill="#1a2554" opacity=".7"/>
+                <rect x="10" y="7" width="4" height="14" rx="1" fill="#c9a84c"/>
+                <rect x="17" y="3" width="4" height="18" rx="1" fill="#1a2554"/>
+              </svg>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chartTime"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- REVIEWS -->
+      <div class="reviews-card">
+        <div class="reviews-header">
+          <div class="reviews-title">
+            Reseñas recibidas
+            <span class="count-pill" id="countPill">0</span>
+          </div>
+          <div class="toolbar">
+            <!-- Stars filter -->
+            <div class="dd-wrap" id="ddStarsWrap">
+              <div class="dd-btn" id="ddStarsBtn" onclick="toggleDd('ddStars')">
+                <span id="ddStarsLabel">Todas las estrellas</span>
+                <svg class="dd-chevron" viewBox="0 0 16 16" fill="none">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="dd-menu" id="ddStars">
+                <div class="dd-opt active" data-val="0" onclick="pickStars(this)">Todas las estrellas</div>
+                <div class="dd-opt" data-val="5" onclick="pickStars(this)">★★★★★ &nbsp;Excelente</div>
+                <div class="dd-opt" data-val="4" onclick="pickStars(this)">★★★★ &nbsp;Buena</div>
+                <div class="dd-opt" data-val="3" onclick="pickStars(this)">★★★ &nbsp;Regular</div>
+                <div class="dd-opt" data-val="2" onclick="pickStars(this)">★★ &nbsp;Mala</div>
+                <div class="dd-opt" data-val="1" onclick="pickStars(this)">★ &nbsp;Muy mala</div>
+              </div>
+            </div>
+            <!-- Comment filter -->
+            <div class="dd-wrap" id="ddCommentWrap">
+              <div class="dd-btn" id="ddCommentBtn" onclick="toggleDd('ddComment')">
+                <span id="ddCommentLabel">Con y sin comentario</span>
+                <svg class="dd-chevron" viewBox="0 0 16 16" fill="none">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="dd-menu" id="ddComment">
+                <div class="dd-opt active" data-val="all" onclick="pickComment(this)">Con y sin comentario</div>
+                <div class="dd-opt" data-val="yes" onclick="pickComment(this)">Con comentario</div>
+                <div class="dd-opt" data-val="no" onclick="pickComment(this)">Sin comentario</div>
+              </div>
+            </div>
+            <button class="btn-export" onclick="exportCSV()">
+              ↓ Exportar CSV
+            </button>
+          </div>
+        </div>
+
+        <div id="reviewList">
+          <div class="loading-state">
+            <div class="spin-big"></div>
+            <p>Cargando reseñas…</p>
+          </div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══════════════════════════════
+     FIREBASE + LOGIC
+══════════════════════════════ -->
+<script type="module">
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, query, orderBy }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyBcgbnHMsusXJkiGMWxt3qMD_Z871-2hd4",
+    authDomain:        "qrroel-92f13.firebaseapp.com",
+    projectId:         "qrroel-92f13",
+    storageBucket:     "qrroel-92f13.firebasestorage.app",
+    messagingSenderId: "55171151181",
+    appId:             "1:55171151181:web:7c0dcb1c5195e651aa7304"
+  };
+
+  const PAGE_SIZE = 10;
+
+  const app  = initializeApp(firebaseConfig);
+  const db   = getFirestore(app);
+  const auth = getAuth(app);
+
+  // ── SUCURSALES ──
+  const SUCURSALES = {
+    tienda: {
+      collection: 'resenas',
+      title: 'Resumen de calificaciones — Tienda Principal',
+      clienteUrl: 'https://tuopinionroel.web.app/calificacion.html',
+      qrUrl: 'https://monitoreoopinionroel.web.app/qr-roel.html',
+      cat1: 'Atención al cliente',
+      cat2: 'Calidad de la joya',
+      cat1Short: 'Atención',
+      cat2Short: 'Joya',
+      cat1Icon: `<svg viewBox="0 0 32 32" width="15" height="15" style="flex-shrink:0"><circle cx="16" cy="11" r="6" fill="#1a2554"/><path d="M4 29c0-6.627 5.373-12 12-12s12 5.373 12 12H4z" fill="#1a2554"/></svg>`,
+      cat2Icon: `<svg viewBox="0 0 32 32" width="15" height="15" style="flex-shrink:0"><path d="M7 4h18l5 9H2L7 4z" fill="#e8c96a"/><path d="M2 13l14 15 14-15H2z" fill="#c9a84c"/></svg>`
+    },
+    bodega: {
+      collection: 'resenas_bodega',
+      title: 'Resumen de calificaciones — Bodega',
+      clienteUrl: 'https://tuopinionroel.web.app/calificacion-bodega.html',
+      qrUrl: 'https://monitoreoopinionroel.web.app/qr-bodega.html',
+      cat1: 'Atención del vendedor',
+      cat2: 'Calidad-Precio',
+      cat1Short: 'Atención',
+      cat2Short: 'Calidad-Precio',
+      cat1Icon: `<svg viewBox="0 0 32 32" width="15" height="15" style="flex-shrink:0"><circle cx="16" cy="11" r="6" fill="#1a2554"/><path d="M4 29c0-6.627 5.373-12 12-12s12 5.373 12 12H4z" fill="#1a2554"/></svg>`,
+      cat2Icon: `<svg viewBox="0 0 32 32" width="15" height="15" style="flex-shrink:0"><path d="M7 4h18l5 9H2L7 4z" fill="#e8c96a"/><path d="M2 13l14 15 14-15H2z" fill="#c9a84c"/></svg>`
+    }
+  };
+  const TIME_LABEL = 'Tiempo de atención';
+  const TIME_ICON  = `<svg viewBox="0 0 32 32" width="15" height="15" style="flex-shrink:0"><circle cx="16" cy="16" r="13" fill="#1a2554"/><path d="M16 9v7l4.5 4.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
+
+  let _sucursal = 'tienda';
+
+  let allReviews    = [];
+  let filtered      = [];
+  let currentPage   = 1;
+  let chartService  = null;
+  let chartProduct  = null;
+  let chartTime     = null;
+
+  // ── SUCURSAL ──
+  function setSucursal(name, el) {
+    if (_sucursal === name) return;
+    _sucursal = name;
+    document.querySelectorAll('#sidebar .sucursal-switch-btn').forEach(i => i.classList.toggle('active', i === el));
+    updateLabels();
+    if (window.innerWidth <= 768) toggleSidebar();
+    loadData();
+  }
+
+  function openCliente() {
+    window.open(SUCURSALES[_sucursal].clienteUrl, '_blank');
+  }
+
+  function openQR() {
+    window.open(SUCURSALES[_sucursal].qrUrl, '_blank');
+  }
+
+  function updateLabels() {
+    const s = SUCURSALES[_sucursal];
+    document.getElementById('topbarTitle').textContent = s.title;
+    document.getElementById('labelService').textContent = s.cat1;
+    document.getElementById('labelProduct').textContent = s.cat2;
+    document.getElementById('chartTitleService').textContent = s.cat1;
+    document.getElementById('chartTitleProduct').textContent = s.cat2;
+  }
+
+  // ── LOAD DATA ──
+  async function loadData() {
+    const btn = document.getElementById('btnRefresh');
+    btn.classList.add('spinning');
+    document.getElementById('reviewList').innerHTML =
+      `<div class="loading-state"><div class="spin-big"></div><p>Cargando reseñas…</p></div>`;
+
+    try {
+      const colName = SUCURSALES[_sucursal].collection;
+      const snap = await getDocs(query(collection(db,colName), orderBy('fecha','desc')));
+      allReviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      applyFilters(); // actualiza stats, gráficas y lista de una sola vez
+      document.getElementById('lastUpdated').textContent =
+        'Actualizado: ' + new Date().toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'});
+    } catch(e) {
+      console.error(e);
+      document.getElementById('reviewList').innerHTML =
+        `<div class="empty-state"><div class="e-icon">⚠️</div><p>Error al cargar. Verifica tu configuración Firebase.</p></div>`;
+    } finally {
+      btn.classList.remove('spinning');
+    }
+  }
+
+  // ── STATS ──
+  function updateStats(reviews) {
+    const n = reviews.length;
+    document.getElementById('statTotal').textContent = n;
+    document.getElementById('badgeTotal').textContent = n + ' total';
+
+    if (n === 0) {
+      ['Service','Product','Time','Avg'].forEach(k => {
+        document.getElementById('stat'+k).textContent  = '—';
+        document.getElementById('stars'+k).textContent = '';
+        document.getElementById('badge'+k).textContent = '—';
+      });
+      return;
+    }
+
+    const avgS = reviews.reduce((a,r) => a + (r.atencion||0), 0) / n;
+    const avgP = reviews.reduce((a,r) => a + (r.producto||0), 0) / n;
+    const avgT = reviews.reduce((a,r) => a + (r.tiempo||0), 0) / n;
+    const avgA = (avgS + avgP + avgT) / 3;
+
+    const bar = v => '★'.repeat(Math.round(v)) + '☆'.repeat(5 - Math.round(v));
+    const lbl = v => v >= 4.5 ? '🤩 Excelente' : v >= 3.5 ? '😊 Buena' : v >= 2.5 ? '😐 Regular' : '😞 Baja';
+
+    document.getElementById('statService').textContent  = avgS.toFixed(1);
+    document.getElementById('starsService').textContent = bar(avgS);
+    document.getElementById('badgeService').textContent = lbl(avgS);
+
+    document.getElementById('statProduct').textContent  = avgP.toFixed(1);
+    document.getElementById('starsProduct').textContent = bar(avgP);
+    document.getElementById('badgeProduct').textContent = lbl(avgP);
+
+    document.getElementById('statTime').textContent  = avgT.toFixed(1);
+    document.getElementById('starsTime').textContent = bar(avgT);
+    document.getElementById('badgeTime').textContent = lbl(avgT);
+
+    document.getElementById('statAvg').textContent  = avgA.toFixed(1);
+    document.getElementById('starsAvg').textContent = bar(avgA);
+    document.getElementById('badgeAvg').textContent = lbl(avgA);
+  }
+
+  // ── CHARTS ──
+  function updateCharts(reviews) {
+    const dist = cat => [1,2,3,4,5].map(v => reviews.filter(r => r[cat] === v).length);
+
+    const cfg = (label, data, color) => ({
+      type: 'bar',
+      data: {
+        labels: ['1 ★','2 ★★','3 ★★★','4 ★★★★','5 ★★★★★'],
+        datasets: [{
+          label,
+          data,
+          backgroundColor: [
+            'rgba(192,57,43,.75)',
+            'rgba(230,126,34,.75)',
+            'rgba(201,168,76,.75)',
+            'rgba(41,128,185,.75)',
+            'rgba(39,174,96,.75)'
+          ],
+          borderRadius: 8,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, border: { display: false },
+               ticks: { font: { size: 11, family: 'Inter' }, color: '#8a96a6' } },
+          y: { grid: { color: '#f0ece4' }, border: { display: false },
+               ticks: { precision: 0, font: { size: 11, family: 'Inter' }, color: '#8a96a6' } }
+        }
+      }
+    });
+
+    const s = SUCURSALES[_sucursal];
+    if (chartService) chartService.destroy();
+    if (chartProduct) chartProduct.destroy();
+    if (chartTime)    chartTime.destroy();
+    chartService = new Chart(document.getElementById('chartService'), cfg(s.cat1Short, dist('atencion')));
+    chartProduct = new Chart(document.getElementById('chartProduct'), cfg(s.cat2Short, dist('producto')));
+    chartTime    = new Chart(document.getElementById('chartTime'),    cfg('Tiempo',    dist('tiempo')));
+  }
+
+  // ── SIDEBAR MÓVIL ──
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+
+  // ── FILTRO DE FECHA ──
+  let _filterDate   = 'all';
+  let _customFrom   = null;
+  let _customTo     = null;
+
+  function pickDate(btn) {
+    _filterDate = btn.dataset.range;
+    _customFrom = null;
+    _customTo   = null;
+    document.querySelectorAll('.df-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.getElementById('btnCustomRange').classList.remove('active');
+    document.getElementById('customRangePanel').classList.remove('open');
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value   = '';
+    applyFilters();
+  }
+
+  function toggleCustomPanel() {
+    const panel = document.getElementById('customRangePanel');
+    const btn   = document.getElementById('btnCustomRange');
+    const isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    btn.classList.toggle('active', !isOpen);
+  }
+
+  function applyCustomRange() {
+    const fromVal = document.getElementById('dateFrom').value;
+    const toVal   = document.getElementById('dateTo').value;
+    if (!fromVal && !toVal) return;
+    _filterDate = 'custom';
+    _customFrom = fromVal ? new Date(fromVal + 'T00:00:00') : null;
+    _customTo   = toVal   ? new Date(toVal   + 'T23:59:59') : null;
+    document.querySelectorAll('.df-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btnCustomRange').classList.add('active');
+    applyFilters();
+  }
+
+  function clearCustomRange() {
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value   = '';
+    _filterDate = 'all';
+    _customFrom = null;
+    _customTo   = null;
+    document.getElementById('btnCustomRange').classList.remove('active');
+    document.getElementById('customRangePanel').classList.remove('open');
+    document.querySelectorAll('.df-btn').forEach((b,i) => b.classList.toggle('active', i === 0));
+    applyFilters();
+  }
+
+  function onCustomRangeChange() {} // ya no necesaria, pero la dejamos por si acaso
+
+  function dateRangeStart(range) {
+    if (range === 'custom') return _customFrom; // puede ser null (sin límite inferior)
+    const now = new Date();
+    if (range === 'today') return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (range === 'week') {
+      const d = new Date(now);
+      d.setDate(d.getDate() - d.getDay());
+      d.setHours(0,0,0,0);
+      return d;
+    }
+    if (range === 'month') return new Date(now.getFullYear(), now.getMonth(), 1);
+    if (range === '3m')    return new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+    if (range === 'year')  return new Date(now.getFullYear(), 0, 1);
+    return null; // 'all'
+  }
+
+  // ── CUSTOM DROPDOWNS ──
+  let _filterStars   = '0';
+  let _filterComment = 'all';
+
+  function toggleDd(id) {
+    const menu = document.getElementById(id);
+    const btn  = document.getElementById(id + 'Btn');
+    const isOpen = menu.classList.contains('open');
+    // close all
+    document.querySelectorAll('.dd-menu').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.dd-btn').forEach(b => b.classList.remove('open'));
+    if (!isOpen) { menu.classList.add('open'); btn.classList.add('open'); }
+  }
+
+  function pickStars(el) {
+    _filterStars = el.dataset.val;
+    document.getElementById('ddStarsLabel').textContent = el.textContent.trim();
+    document.querySelectorAll('#ddStars .dd-opt').forEach(o => o.classList.toggle('active', o === el));
+    document.getElementById('ddStars').classList.remove('open');
+    document.getElementById('ddStarsBtn').classList.remove('open');
+    applyFilters();
+  }
+
+  function pickComment(el) {
+    _filterComment = el.dataset.val;
+    document.getElementById('ddCommentLabel').textContent = el.textContent.trim();
+    document.querySelectorAll('#ddComment .dd-opt').forEach(o => o.classList.toggle('active', o === el));
+    document.getElementById('ddComment').classList.remove('open');
+    document.getElementById('ddCommentBtn').classList.remove('open');
+    applyFilters();
+  }
+
+  // Close dropdowns on outside click
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.dd-wrap')) {
+      document.querySelectorAll('.dd-menu').forEach(m => m.classList.remove('open'));
+      document.querySelectorAll('.dd-btn').forEach(b => b.classList.remove('open'));
+    }
+  });
+
+  // ── FILTERS ──
+  function applyFilters() {
+    const fs    = parseInt(_filterStars);
+    const fc    = _filterComment;
+    const start = dateRangeStart(_filterDate);
+
+    // 1. Filtrar por fecha → para stats y gráficas
+    const byDate = (start || _customTo)
+      ? allReviews.filter(r => {
+          const fecha = r.fecha?.toDate ? r.fecha.toDate() : new Date(r.fecha);
+          if (start    && fecha < start)    return false;
+          if (_customTo && fecha > _customTo) return false;
+          return true;
+        })
+      : allReviews;
+
+    updateStats(byDate);
+    updateCharts(byDate);
+
+    // 2. Filtrar también por estrellas y comentario → solo para la lista
+    filtered = byDate.filter(r => {
+      const avg = ((r.atencion||0) + (r.producto||0) + (r.tiempo||0)) / 3;
+      if (fs > 0 && Math.round(avg) !== fs) return false;
+      if (fc === 'yes' && !r.comentario) return false;
+      if (fc === 'no'  &&  r.comentario) return false;
+      return true;
+    });
+
+    currentPage = 1;
+    document.getElementById('countPill').textContent = filtered.length;
+    renderList();
+  }
+
+  // ── RENDER LIST ──
+  function renderList() {
+    if (filtered.length === 0) {
+      document.getElementById('reviewList').innerHTML =
+        `<div class="empty-state">
+           <div class="e-icon">${allReviews.length === 0 ? '📭' : '🔍'}</div>
+           <p>${allReviews.length === 0 ? 'Aún no hay reseñas.' : 'Ninguna reseña coincide con el filtro.'}</p>
+         </div>`;
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const page  = filtered.slice(start, start + PAGE_SIZE);
+
+    const colorClass = avg =>
+      avg >= 4.5 ? 'c5' : avg >= 3.5 ? 'c4' : avg >= 2.5 ? 'c3' : avg >= 1.5 ? 'c2' : 'c1';
+
+    const filled = n => '★'.repeat(n) + '☆'.repeat(5-n);
+
+    const fmtDate = ts => {
+      if (!ts) return '—';
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleDateString('es-CO', {day:'2-digit',month:'short',year:'numeric'})
+           + '<br>' + d.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'});
+    };
+
+    const s = SUCURSALES[_sucursal];
+    document.getElementById('reviewList').innerHTML = page.map(r => {
+      const avg = ((r.atencion||0) + (r.producto||0) + (r.tiempo||0)) / 3;
+      return `
+        <div class="review-item ${colorClass(avg)}">
+          <div>
+            <div class="review-cats">
+              <div class="rcat">
+                <span class="label">${s.cat1Icon} ${s.cat1}</span>
+                <span class="stars-val">${filled(r.atencion||0)}</span>
+                <span class="num">${r.atencion||0}/5</span>
+              </div>
+              <div class="rcat">
+                <span class="label">${s.cat2Icon} ${s.cat2}</span>
+                <span class="stars-val">${filled(r.producto||0)}</span>
+                <span class="num">${r.producto||0}/5</span>
+              </div>
+              <div class="rcat">
+                <span class="label">${TIME_ICON} ${TIME_LABEL}</span>
+                <span class="stars-val">${filled(r.tiempo||0)}</span>
+                <span class="num">${r.tiempo||0}/5</span>
+              </div>
+            </div>
+            ${r.comentario ? `<div class="review-comment">${r.comentario}</div>` : ''}
+          </div>
+          <div class="review-meta">
+            <div class="review-date">${fmtDate(r.fecha)}</div>
+            <div class="avg-pill">⭐ ${avg.toFixed(1)}</div>
+          </div>
+        </div>`;
+    }).join('<div class="review-list">') + '</div>';
+
+    // Pagination
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    if (totalPages <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+
+    let pages = '';
+    // Prev
+    pages += `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      if (totalPages <= 7 || Math.abs(i - currentPage) <= 2 || i === 1 || i === totalPages) {
+        pages += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+      } else if (Math.abs(i - currentPage) === 3) {
+        pages += `<span style="color:#9aa5b4;padding:0 4px">…</span>`;
+      }
+    }
+    // Next
+    pages += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
+    document.getElementById('pagination').innerHTML = pages;
+  }
+
+  function goPage(p) {
+    currentPage = p;
+    renderList();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── EXPORT CSV ──
+  function exportCSV() {
+    if (filtered.length === 0) { alert('No hay reseñas para exportar.'); return; }
+
+    const s = SUCURSALES[_sucursal];
+    const rows = [['Fecha', `${s.cat1} (1-5)`, `${s.cat2} (1-5)`, `${TIME_LABEL} (1-5)`, 'Promedio', 'Comentario']];
+    filtered.forEach(r => {
+      const d   = r.fecha?.toDate ? r.fecha.toDate() : new Date();
+      const avg = ((r.atencion||0) + (r.producto||0) + (r.tiempo||0)) / 3;
+      rows.push([
+        d.toLocaleString('es-CO'),
+        r.atencion || 0,
+        r.producto  || 0,
+        r.tiempo    || 0,
+        avg.toFixed(2),
+        (r.comentario || '').replace(/"/g, '""')
+      ]);
+    });
+
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `roel-resenas-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── AUTH ──
+  async function doLogin() {
+    const email = document.getElementById('emailInput').value.trim();
+    const pass  = document.getElementById('passInput').value;
+    const btn   = document.getElementById('btnLogin');
+    const err   = document.getElementById('loginErr');
+
+    if (!email || !pass) {
+      err.textContent = '⚠ Ingresa tu correo y contraseña.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Verificando…';
+    err.textContent = '';
+
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      // onAuthStateChanged se encarga de mostrar el dashboard
+    } catch (e) {
+      const msgs = {
+        'auth/user-not-found':      '❌ Usuario no encontrado.',
+        'auth/wrong-password':      '❌ Contraseña incorrecta.',
+        'auth/invalid-email':       '❌ Correo inválido.',
+        'auth/too-many-requests':   '⚠ Demasiados intentos. Intenta más tarde.',
+        'auth/invalid-credential':  '❌ Correo o contraseña incorrectos.',
+      };
+      err.textContent = msgs[e.code] || '❌ Error al iniciar sesión.';
+      btn.disabled = false;
+      btn.textContent = 'Entrar al panel';
+    }
+  }
+
+  async function doLogout() {
+    await signOut(auth);
+  }
+
+  // ── Observar estado de autenticación ──
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').style.display        = 'block';
+      loadData();
+    } else {
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('app').style.display        = 'none';
+      // Resetear botón de login
+      const btn = document.getElementById('btnLogin');
+      if (btn) { btn.disabled = false; btn.textContent = 'Entrar al panel'; }
+    }
+  });
+
+  // ── Exponer al HTML (onclick) ──
+  window.setSucursal  = setSucursal;
+  window.openCliente  = openCliente;
+  window.openQR       = openQR;
+  window.loadData     = loadData;
+  window.applyFilters = applyFilters;
+  window.goPage       = goPage;
+  window.exportCSV    = exportCSV;
+  window.doLogin      = doLogin;
+  window.doLogout     = doLogout;
+  window.toggleDd     = toggleDd;
+  window.pickStars    = pickStars;
+  window.pickComment  = pickComment;
+  window.pickDate          = pickDate;
+  window.toggleCustomPanel = toggleCustomPanel;
+  window.applyCustomRange  = applyCustomRange;
+  window.clearCustomRange  = clearCustomRange;
+  window.onCustomRangeChange = onCustomRangeChange;
+  window.toggleSidebar     = toggleSidebar;
+</script>
+</body>
+</html>

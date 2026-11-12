@@ -1,0 +1,94 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── TIENDA PRINCIPAL ──────────────────────────────────────────────────
+    match /resenas/{docId} {
+
+      // ── CREAR (público sin auth) ──────────────────────────────────────────
+      // La petición debe venir de un navegador real verificado por App Check (reCAPTCHA v3).
+      // Los datos deben ser válidos.
+      allow create: if
+        // Campos obligatorios presentes
+        request.resource.data.keys().hasAll(['atencion', 'producto', 'tiempo', 'fecha']) &&
+
+        // atencion: entero 1-5
+        request.resource.data.atencion is int &&
+        request.resource.data.atencion >= 1 &&
+        request.resource.data.atencion <= 5 &&
+
+        // producto: entero 1-5
+        request.resource.data.producto is int &&
+        request.resource.data.producto >= 1 &&
+        request.resource.data.producto <= 5 &&
+
+        // tiempo: entero 1-5
+        request.resource.data.tiempo is int &&
+        request.resource.data.tiempo >= 1 &&
+        request.resource.data.tiempo <= 5 &&
+
+        // comentario: opcional, máximo 500 caracteres
+        (
+          !('comentario' in request.resource.data) ||
+          (
+            request.resource.data.comentario is string &&
+            request.resource.data.comentario.size() <= 500
+          )
+        ) &&
+
+        // No se permiten campos extra (evita basura en la colección)
+        request.resource.data.keys().hasOnly(['atencion', 'producto', 'tiempo', 'comentario', 'fecha']);
+
+      // ── LEER (solo admins autenticados) ──────────────────────────────────
+      // El dashboard usa Firebase Auth — request.auth != null
+      allow read: if request.auth != null;
+
+      // ── MODIFICAR / BORRAR: nadie ────────────────────────────────────────
+      allow update, delete: if false;
+    }
+
+    // ── BODEGA ────────────────────────────────────────────────────────────
+    match /resenas_bodega/{docId} {
+
+      // ── CREAR (público sin auth) ──────────────────────────────────────────
+      // La petición debe venir de un navegador real verificado por App Check (reCAPTCHA v3).
+      // Los datos deben ser válidos.
+      allow create: if
+        // Campos obligatorios presentes
+        request.resource.data.keys().hasAll(['atencion', 'producto', 'tiempo', 'fecha']) &&
+
+        // atencion: entero 1-5
+        request.resource.data.atencion is int &&
+        request.resource.data.atencion >= 1 &&
+        request.resource.data.atencion <= 5 &&
+
+        // producto: entero 1-5
+        request.resource.data.producto is int &&
+        request.resource.data.producto >= 1 &&
+        request.resource.data.producto <= 5 &&
+
+        // tiempo: entero 1-5
+        request.resource.data.tiempo is int &&
+        request.resource.data.tiempo >= 1 &&
+        request.resource.data.tiempo <= 5 &&
+
+        // comentario: opcional, máximo 500 caracteres
+        (
+          !('comentario' in request.resource.data) ||
+          (
+            request.resource.data.comentario is string &&
+            request.resource.data.comentario.size() <= 500
+          )
+        ) &&
+
+        // No se permiten campos extra (evita basura en la colección)
+        request.resource.data.keys().hasOnly(['atencion', 'producto', 'tiempo', 'comentario', 'fecha']);
+
+      // ── LEER (solo admins autenticados) ──────────────────────────────────
+      allow read: if request.auth != null;
+
+      // ── MODIFICAR / BORRAR: nadie ────────────────────────────────────────
+      allow update, delete: if false;
+    }
+  }
+}

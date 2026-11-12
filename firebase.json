@@ -1,0 +1,70 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": ["node_modules", ".git", "firebase-debug.log"]
+    }
+  ],
+  "hosting": [
+    {
+      "target": "cliente",
+      "public": ".",
+      "ignore": [
+        "firebase.json",
+        "firestore.rules",
+        "**/.*",
+        "**/node_modules/**",
+        "dashboard.html",
+        "qr-roel.html",
+        "qr-bodega.html",
+        "functions/**"
+      ],
+      "headers": [
+        {
+          "source": "**",
+          "headers": [
+            { "key": "X-Content-Type-Options",  "value": "nosniff" },
+            { "key": "X-Frame-Options",          "value": "DENY" },
+            { "key": "X-XSS-Protection",         "value": "1; mode=block" },
+            { "key": "Referrer-Policy",           "value": "strict-origin-when-cross-origin" },
+            { "key": "Permissions-Policy",        "value": "camera=(), microphone=(), geolocation=()" }
+          ]
+        }
+      ]
+    },
+    {
+      "target": "admin",
+      "public": ".",
+      "ignore": [
+        "firebase.json",
+        "firestore.rules",
+        "**/.*",
+        "**/node_modules/**",
+        "index.html",
+        "calificacion.html",
+        "calificacion-bodega.html",
+        "functions/**"
+      ],
+      "rewrites": [
+        { "source": "/", "destination": "/dashboard.html" }
+      ],
+      "headers": [
+        {
+          "source": "**",
+          "headers": [
+            { "key": "X-Content-Type-Options",  "value": "nosniff" },
+            { "key": "X-Frame-Options",          "value": "DENY" },
+            { "key": "X-XSS-Protection",         "value": "1; mode=block" },
+            { "key": "Referrer-Policy",           "value": "strict-origin-when-cross-origin" },
+            { "key": "Permissions-Policy",        "value": "camera=(), microphone=(), geolocation=()" },
+            { "key": "Cache-Control",             "value": "no-store, no-cache, must-revalidate" }
+          ]
+        }
+      ]
+    }
+  ]
+}

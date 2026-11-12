@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "qrroel-92f13"
+  },
+  "targets": {
+    "qrroel-92f13": {
+      "hosting": {
+        "cliente": ["tuopinionroel"],
+        "admin":   ["monitoreoopinionroel"]
+      }
+    }
+  }
+}
