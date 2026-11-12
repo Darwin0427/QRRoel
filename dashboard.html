@@ -561,7 +561,7 @@
     </div>
 
     <div class="sucursal-switch">
-      <button class="sucursal-switch-btn active" id="sucTienda" onclick="setSucursal('tienda', this)">Tienda Principal</button>
+      <button class="sucursal-switch-btn active" id="sucTienda" onclick="setSucursal('tienda', this)">Tienda de Daniela</button>
       <button class="sucursal-switch-btn" id="sucBodega" onclick="setSucursal('bodega', this)">Bodega</button>
     </div>
 
@@ -597,7 +597,7 @@
           <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
         </svg>
       </button>
-      <div class="topbar-title" id="topbarTitle">Resumen de calificaciones — Tienda Principal</div>
+      <div class="topbar-title" id="topbarTitle">Resumen de calificaciones — Tienda de Daniela</div>
       <div class="topbar-right">
         <span class="last-updated" id="lastUpdated">—</span>
         <button class="btn-refresh" id="btnRefresh" onclick="loadData()">
@@ -889,7 +889,7 @@
   const SUCURSALES = {
     tienda: {
       collection: 'resenas',
-      title: 'Resumen de calificaciones — Tienda Principal',
+      title: 'Resumen de calificaciones — Tienda de Daniela',
       clienteUrl: 'https://tuopinionroel.web.app/calificacion.html',
       qrUrl: 'https://monitoreoopinionroel.web.app/qr-roel.html',
       cat1: 'Atención al cliente',
@@ -975,6 +975,8 @@
   }
 
   // ── STATS ──
+  const escHtml = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
   function updateStats(reviews) {
     const n = reviews.length;
     document.getElementById('statTotal').textContent = n;
@@ -1253,7 +1255,7 @@
                 <span class="num">${r.tiempo||0}/5</span>
               </div>
             </div>
-            ${r.comentario ? `<div class="review-comment">${r.comentario}</div>` : ''}
+            ${r.comentario ? `<div class="review-comment">${escHtml(r.comentario)}</div>` : ''}
           </div>
           <div class="review-meta">
             <div class="review-date">${fmtDate(r.fecha)}</div>
